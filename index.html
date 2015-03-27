@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Performance tool</title>
+  <script src="http://fb.me/react-0.10.0.min.js"></script>
+  <script src="http://fb.me/JSXTransformer-0.10.0.js"></script>
+  <script src="https://code.jquery.com/jquery-1.10.0.min.js"></script>
+</head>
+<body>
+<div id="mount-point"></div>
+<script type="text/jsx">
+  /*** @jsx React.DOM */
+  var App = React.createClass({
+    render: function(){
+      return (
+        <div>
+          <Stats />
+        </div>
+      );
+    }
+  });
+
+  var Stats = React.createClass({
+    getInitialState: function(){
+        return { data: {}};
+    },
+    loadStatsFromServer: function() {
+      var self = this;
+
+      $.ajax({
+        url: 'data.json',
+        dataType: 'json',
+        success: function(data) {
+          self.setState({
+            title: data.title,
+            score: data.score,
+            number_resources: data.pageStats.numberResources,
+            number_css_resources: data.pageStats.numberCssResources,
+            number_js_resources: data.pageStats.numberJsResources
+          });
+        },
+        error: function(xhr, status, err) {
+          console.error('data.json', status, err.toString());
+        }
+      });
+    },
+    componentWillReceiveProps: function(nextProps) {
+      console.log('msg');
+    },
+    componentDidMount: function() {
+      this.loadStatsFromServer();
+      setInterval(this.loadStatsFromServer, 5000);
+    },
+    render: function(){
+      return (
+        <div>
+          <h2>{this.state.title}</h2>
+          <p>your page score is {this.state.score}</p>
+          <p>number resources {this.state.number_resources}</p>
+          <p>number css resources {this.state.number_css_resources}</p>
+          <p>number js resources {this.state.number_js_resources}</p>
+        </div>
+      );
+    }
+  });
+
+  React.renderComponent(<App />, document.getElementById('mount-point'));
+</script>
+</body>
+</html>
